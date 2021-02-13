@@ -53,9 +53,13 @@ async def on_ready():
 
 @bot.event
 async def on_voice_state_update(member, before, after):
+
+    if member.name == "WelcomeBack!":
+        return
+
     channel = after.channel
 
-    if channel is not None:
+    if channel is not None and before.channel != after.channel:
 
         for vc in bot.voice_clients:
             await vc.disconnect()
