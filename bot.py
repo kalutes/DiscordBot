@@ -5,6 +5,7 @@ import opuslib
 import opuslib.api
 import opuslib.api.encoder
 import opuslib.api.decoder
+import glob
 
 import os
 from os import path
@@ -35,7 +36,31 @@ async def add_welcome(ctx, username):
         await ctx.send("Attached file is not a .mp3")
         return
     
-    file_name = 'audio/' + username + '.mp3'
+    file_expression = 'audio/' + username + '*.mp3'
+
+    user_files = glob.glob(file_expression)
+
+    max = 0
+
+    for user_file in user_files:
+        last_num_index = user_file.rfind(".")
+
+        first_num_index = last_num_index - 1
+        while user_file[first_num_index] >= '0' and user_file[first_num_index] <= '9':
+            first_num_index -= 1
+        first_num_index += 1
+
+        index_string = user_file[first_num_index:last_num_index]
+
+        num_index_val = int(index_string)
+
+        if num_index_val > max:
+            max = num_index_val
+
+    max += 1
+
+    file_name = 'audio/' + username + '_' + str(max) + '.mp3'
+
     await ctx.message.attachments[0].save(file_name)
 
     print("Saved audio: " + file_name)
@@ -54,7 +79,7 @@ async def on_ready():
 @bot.event
 async def on_voice_state_update(member, before, after):
 
-    if member.name == "WelcomeBack!":
+    if member.name == "WelcomeBack!" or member.name == "PornsBotDevelopment":
         return
 
     channel = after.channel
@@ -64,9 +89,12 @@ async def on_voice_state_update(member, before, after):
         for vc in bot.voice_clients:
             await vc.disconnect()
 
-        audio_path = 'audio/' + member.name + '.mp3'
+        file_expression = 'audio/' + member.name + '*.mp3'
 
-        if path.exists(audio_path):
+        user_files = glob.glob(file_expression)
+
+        if len(user_files) > 0:
+            audio_path = random.choice(user_files)
             voice_client = await channel.connect()
 
             audio_source = discord.FFmpegPCMAudio(audio_path)
