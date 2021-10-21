@@ -16,9 +16,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+PREFIX = os.getenv('BOT_PREFIX')
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("8=D "),
-                   description='Memes and stuff for Porns server')
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(PREFIX),
+                   description='Memes and stuff')
 
 
 @bot.command(name='welcome', help='Welcomes the specified user with the attached MP3 audio')
@@ -79,7 +80,7 @@ async def on_ready():
 @bot.event
 async def on_voice_state_update(member, before, after):
 
-    if member.name == "WelcomeBack!" or member.name == "PornsBotDevelopment":
+    if member.name == "WelcomeBack!" or member.name == "BotDevelopment":
         return
 
     channel = after.channel
