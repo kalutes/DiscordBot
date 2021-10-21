@@ -1,1 +1,1 @@
-Discord bot for the Porns Discord server
+Discord bot for welcoming people with a sound
