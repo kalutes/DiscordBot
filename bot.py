@@ -18,6 +18,9 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 PREFIX = os.getenv('BOT_PREFIX')
 
+print("Initializing bot with prefix")
+print(PREFIX)
+
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(PREFIX),
                    description='Memes and stuff')
 
@@ -37,7 +40,7 @@ async def add_welcome(ctx, username):
         await ctx.send("Attached file is not a .mp3")
         return
     
-    file_expression = 'audio/' + username + '*.mp3'
+    file_expression = '/media/audio/' + username + '*.mp3'
 
     user_files = glob.glob(file_expression)
 
@@ -60,7 +63,7 @@ async def add_welcome(ctx, username):
 
     max += 1
 
-    file_name = 'audio/' + username + '_' + str(max) + '.mp3'
+    file_name = '/media/audio/' + username + '_' + str(max) + '.mp3'
 
     await ctx.message.attachments[0].save(file_name)
 
@@ -90,7 +93,7 @@ async def on_voice_state_update(member, before, after):
         for vc in bot.voice_clients:
             await vc.disconnect()
 
-        file_expression = 'audio/' + member.name + '*.mp3'
+        file_expression = '/media/audio/' + member.name + '*.mp3'
 
         user_files = glob.glob(file_expression)
 
