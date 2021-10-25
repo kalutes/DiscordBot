@@ -13,3 +13,4 @@ python-dotenv==0.15.0
 six==1.15.0
 typing-extensions==3.7.4.3
 yarl==1.6.3
+youtube_dl==2021.6.6

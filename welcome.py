@@ -6,6 +6,8 @@ import opuslib.api
 import opuslib.api.encoder
 import opuslib.api.decoder
 import glob
+import tempfile
+import youtube_dl
 
 import os
 from os import path
@@ -15,15 +17,14 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-PREFIX = os.getenv('BOT_PREFIX')
+TOKEN = os.getenv('WELCOME_TOKEN')
+PREFIX = os.getenv('WELCOME_PREFIX')
 
 print("Initializing bot with prefix")
 print(PREFIX)
 
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(PREFIX),
                    description='Memes and stuff')
-
 
 @bot.command(name='welcome', help='Welcomes the specified user with the attached MP3 audio')
 async def add_welcome(ctx, username):
@@ -74,7 +75,7 @@ async def add_welcome(ctx, username):
 
 @bot.event
 async def on_ready():
-    print('Logged in as {0} ({0.id})'.format(bot.user))
+    print('Welcome Logged in as {0} ({0.id})'.format(bot.user))
     print('------')
 
     for vc in bot.voice_clients:
