@@ -6,8 +6,6 @@ import opuslib.api
 import opuslib.api.encoder
 import opuslib.api.decoder
 import glob
-import tempfile
-import youtube_dl
 
 import os
 from os import path
