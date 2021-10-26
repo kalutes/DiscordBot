@@ -466,6 +466,29 @@ class Music(commands.Cog):
 
         await self.cleanup(ctx.guild)
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print('Music Logged in as {0} ({0.id})'.format(self.bot.user))
+        print('------')
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if len(self.bot.voice_clients) == 0:
+            return
+        
+        # Hardcode this since this bot is only used in one server currently
+        current_channel = self.bot.voice_clients[0].channel
+
+        # If the user wasn't originally in the channel with the bot, or if the user didn't move channels, don't do anything
+        if before.channel != current_channel or before.channel == after.channel:
+            return
+
+        # Only the bot is connected, cleanup
+        if len(before.channel.members) == 1:
+            # Leave
+            await self.cleanup(current_channel.guild)
+
+
 
 def setup(bot):
     bot.add_cog(Music(bot))
@@ -478,14 +501,6 @@ print("Initializing bot with prefix")
 print(PREFIX)
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(PREFIX),
                    description='Memes and stuff')
-
-@bot.event
-async def on_ready():
-    print('Music Logged in as {0} ({0.id})'.format(bot.user))
-    print('------')
-
-    for vc in bot.voice_clients:
-        await vc.disconnect()   
 
 setup(bot)
 bot.run(TOKEN)
