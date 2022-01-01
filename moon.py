@@ -9,6 +9,10 @@ from discord.ext import tasks
 from gtts import gTTS
 from bs4 import BeautifulSoup
 import asyncio
+try:
+    from urllib import FancyURLopener
+except:
+    from urllib.request import FancyURLopener
 
 load_dotenv()
 TOKEN = os.getenv('MOON_TOKEN')
@@ -16,6 +20,10 @@ PREFIX = os.getenv('MOON_PREFIX')
 
 print("Initializing bot with prefix")
 print(PREFIX)
+
+# Class used to open urls for financial data
+class UrlOpener(FancyURLopener):
+    version = 'w3m/0.5.3+git20180125'
 
 class Security:
     symbol = ""
@@ -27,10 +35,22 @@ class Security:
     volume = ""
 
     def get_yahoo_page(self):
-        return requests.get("https://finance.yahoo.com/quote/{}/".format(self.symbol), headers={'Cache-Control': 'no-cache', "Pragma": "no-cache"})
+        url = "https://finance.yahoo.com/quote/{}/".format(self.symbol)
+        url_opener = UrlOpener()
+        # Try to open the URL up to 10 times sleeping random time if something goes wrong
+        max_retry = 10
+        for i in range(0, max_retry):
+            response = url_opener.open(url)
+            if response.getcode() != 200:
+                print("URL Get failed, sleeping...")
+                time.sleep(random.randrange(10, 20))
+            else:
+                return response.read()
+            if i == max_retry - 1:
+                return ""
 
-    def is_valid(self, page):
-        soup = BeautifulSoup(page.text, 'html.parser')
+    def is_valid(self, page_text):
+        soup = BeautifulSoup(page_text, 'html.parser')
         div = soup.find("div", {"id": "quote-market-notice"})
 
         if div is not None:
@@ -38,20 +58,20 @@ class Security:
 
         return False
 
-    def has_ah_data(self, page):
-        soup = BeautifulSoup(page.text, 'html.parser')
+    def has_ah_data(self, page_text):
+        soup = BeautifulSoup(page_text, 'html.parser')
         div = soup.find("div", {"id": "quote-market-notice"})
         
         return len(div.parent.parent.findChildren("div" , recursive=False)) > 1
 
-    def populate_data(self, page):
-        soup = BeautifulSoup(page.text, 'html.parser')
+    def populate_data(self, page_text):
+        soup = BeautifulSoup(page_text, 'html.parser')
 
         self.volume = soup.find("td", {"data-test": "TD_VOLUME-value"}).findChildren("span" , recursive=False)[0].text
         self.market_hours_price = soup.find("div", {"id": "quote-market-notice"}).parent.findChildren("span" , recursive=False)[0].text
         self.market_hours_change = soup.find("div", {"id": "quote-market-notice"}).parent.findChildren("span" , recursive=False)[1].text
 
-        if self.has_ah_data(page):
+        if self.has_ah_data(page_text):
             self.ah_price = soup.find("div", {"id": "quote-market-notice"}).parent.parent.findChildren("div" , recursive=False)[1].findChildren("span" , recursive=False)[0].text
             self.ah_change = soup.find("div", {"id": "quote-market-notice"}).parent.parent.findChildren("div" , recursive=False)[1].findChildren("span" , recursive=False)[1].text
         
@@ -60,11 +80,11 @@ class Security:
     def __init__(self, symbol):
         self.symbol = symbol
 
-        page = self.get_yahoo_page()
+        page_text = self.get_yahoo_page()
 
-        if self.is_valid(page):
+        if self.is_valid(page_text):
             self.valid = True
-            self.populate_data(page)
+            self.populate_data(page_text)
 
 async def say_price(the_bot, channel, vc, symbol):
     audio_file = "audio.mp3"
