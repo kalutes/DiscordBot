@@ -67,13 +67,13 @@ class Security:
     def populate_data(self, page_text):
         soup = BeautifulSoup(page_text, 'html.parser')
 
-        self.volume = soup.find("td", {"data-test": "TD_VOLUME-value"}).findChildren("span" , recursive=False)[0].text
-        self.market_hours_price = soup.find("div", {"id": "quote-market-notice"}).parent.findChildren("span" , recursive=False)[0].text
-        self.market_hours_change = soup.find("div", {"id": "quote-market-notice"}).parent.findChildren("span" , recursive=False)[1].text
+        self.volume = soup.find("td", {"data-test": "TD_VOLUME-value"}).findChildren("fin-streamer" , recursive=False)[0].text
+        self.market_hours_price = soup.find("div", {"id": "quote-market-notice"}).parent.findChildren("fin-streamer" , recursive=False)[0].text
+        self.market_hours_change = soup.find("div", {"id": "quote-market-notice"}).parent.findChildren("fin-streamer" , recursive=False)[1].findChildren("span", recursive=False)[0].text
 
         if self.has_ah_data(page_text):
-            self.ah_price = soup.find("div", {"id": "quote-market-notice"}).parent.parent.findChildren("div" , recursive=False)[1].findChildren("span" , recursive=False)[0].text
-            self.ah_change = soup.find("div", {"id": "quote-market-notice"}).parent.parent.findChildren("div" , recursive=False)[1].findChildren("span" , recursive=False)[1].text
+            self.ah_price = soup.find("div", {"id": "quote-market-notice"}).parent.parent.findChildren("div" , recursive=False)[1].findChildren("fin-streamer" , recursive=False)[0].text
+            self.ah_change = soup.find("div", {"id": "quote-market-notice"}).parent.parent.findChildren("div" , recursive=False)[1].findChildren("fin-streamer" , recursive=False)[1].text
         
         return
     
