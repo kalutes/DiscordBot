@@ -261,35 +261,37 @@ async def on_voice_state_update(member, before, after):
 
     channel = after.channel
 
-    if channel is not None and before.channel != after.channel:
+    # Special case for MEE6 bot
+    if channel is None or before.channel == after.channel or channel.name == "💢 Join to create VC 💢":
+        return
 
-        for vc in bot.voice_clients:
-            await vc.disconnect()
+    for vc in bot.voice_clients:
+        await vc.disconnect()
 
-        userFiles = []
+    userFiles = []
 
-        if str(member.id) in userMappings['active']:
-            userFiles = userMappings['active'][str(member.id)]
+    if str(member.id) in userMappings['active']:
+        userFiles = userMappings['active'][str(member.id)]
 
-        if len(userFiles) == 0:
-            print("No audio for user " + member.name)
-            return
+    if len(userFiles) == 0:
+        print("No audio for user " + member.name)
+        return
 
-        audioChoice = random.choice(userFiles)
-        voiceClient = await channel.connect()
+    audioChoice = random.choice(userFiles)
+    voiceClient = await channel.connect()
 
-        # Audio choices are stored as a list where the first index is the actual file name in the audio path
-        audioSource = discord.FFmpegPCMAudio(AUDIO_DIR + audioChoice[0])
+    # Audio choices are stored as a list where the first index is the actual file name in the audio path
+    audioSource = discord.FFmpegPCMAudio(AUDIO_DIR + audioChoice[0])
 
-        def disconnect(error):
-            coro = voiceClient.disconnect()
-            fut = asyncio.run_coroutine_threadsafe(coro, bot.loop)
-            try:
-                fut.result()
-            except:
-                # an error happened sending the message
-                pass
+    def disconnect(error):
+        coro = voiceClient.disconnect()
+        fut = asyncio.run_coroutine_threadsafe(coro, bot.loop)
+        try:
+            fut.result()
+        except:
+            # an error happened sending the message
+            pass
 
-        voiceClient.play(audioSource, after=disconnect)
+    voiceClient.play(audioSource, after=disconnect)
  
 bot.run(TOKEN)
